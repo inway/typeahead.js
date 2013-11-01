@@ -37,6 +37,8 @@
     "grunt-contrib-jasmine": "~0.3",
     "grunt-contrib-clean": "~0.4.0",
     "semver": "~1.1.3",
+    "grunt-recess": "~0.4.0",
+    "grunt-curl": "~1.2.0",
     "grunt-parallel": "0.0.2"
   },
   "scripts": {

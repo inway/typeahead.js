@@ -17,6 +17,7 @@ var semver = require('semver'),
 
 module.exports = function(grunt) {
   grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
     version: grunt.file.readJSON('package.json').version,
 
     buildDir: 'dist',
@@ -51,6 +52,34 @@ module.exports = function(grunt) {
         src: jsFiles,
         dest: '<%= buildDir %>/typeahead.min.js'
       }
+    },
+
+    'curl-dir': {
+        'bootstrap-less': {
+            src: [
+                'https://raw.github.com/InWayOpenSource/bootstrap/master/less/mixins.less',
+                'https://raw.github.com/InWayOpenSource/bootstrap/master/less/variables.less',
+            ],
+            dest: 'less/bootstrap'
+        }
+    },
+
+    recess: {
+      options: {
+        compile: true,
+        banner: '<%= banner %>'
+      },
+      bootstrap: {
+        src: ['less/bootstrap.less'],
+        dest: 'dist/<%= pkg.name %>.css'
+      },
+      min: {
+        options: {
+          compress: true
+        },
+        src: ['less/bootstrap.less'],
+        dest: 'dist/<%= pkg.name %>.min.css'
+      },
     },
 
     sed: {
@@ -130,7 +159,8 @@ module.exports = function(grunt) {
     },
 
     clean: {
-      dist: 'dist'
+      dist: 'dist',
+      boostrap: 'less/bootstrap'
     },
 
     connect: {
@@ -211,7 +241,8 @@ module.exports = function(grunt) {
   // -------
 
   grunt.registerTask('default', 'build');
-  grunt.registerTask('build', ['uglify', 'sed:version']);
+  grunt.registerTask('build', ['uglify', 'css', 'sed:version']);
+  grunt.registerTask('css', ['curl-dir:bootstrap-less', 'recess']);
   grunt.registerTask('server', 'connect:server');
   grunt.registerTask('lint', 'jshint');
   grunt.registerTask('test', 'jasmine:js');
@@ -231,4 +262,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
+  grunt.loadNpmTasks('grunt-curl');
+  grunt.loadNpmTasks('grunt-recess');
 };
