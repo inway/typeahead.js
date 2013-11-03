@@ -6,6 +6,15 @@
   .tt-hint {
     margin-bottom: 0;
   }
+
+  .tt-hint { 
+    display: block;
+    height: @input-height-base;
+    padding: 8px 12px;
+    font-size: @font-size-base;
+    line-height: @line-height-base;
+    border: 1px solid transparent;
+  }
 }
 
 .tt-dropdown-menu {
@@ -28,26 +37,16 @@
 .tt-suggestion {
   display: block;
   padding: 3px 20px;
+  &.tt-is-under-cursor {
+    color: @dropdown-link-hover-color;
+    #gradient > .vertical(@dropdown-link-hover-bg, darken(@dropdown-link-hover-bg, 5%));
+    a {
+      color: @dropdown-bg;
+    }
+  }
+
+  p {
+    margin: 0;
+  }
 }
 
-.tt-suggestion.tt-is-under-cursor {
-  color: @dropdown-link-hover-color;
-  #gradient > .vertical(@dropdown-link-hover-bg, darken(@dropdown-link-hover-bg, 5%));
-}
-
-.tt-suggestion.tt-is-under-cursor a {
-  color: @dropdown-bg;
-}
-
-.tt-suggestion p {
-  margin: 0;
-}
-
-.twitter-typeahead .tt-hint { 
-  display: block;
-  height: @input-height-base;
-  padding: 8px 12px;
-  font-size: @font-size-base;
-  line-height: @line-height-base;
-  border: 1px solid transparent;
-}
