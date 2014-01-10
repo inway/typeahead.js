@@ -99,9 +99,9 @@ When defining a dataset, the following options are available:
 
 * `limit` – The max number of suggestions from the dataset to display for a given query. Defaults to `5`.
 
-* `template` – The template used to render suggestions. Can be a string or a precompiled template. If not provided, suggestions will render as their value contained in a `<p>` element (i.e. `<p>value</p>`).
+* `template` – The template used to render suggestions. Can be a string or a precompiled template (i.e. a function that takes a [datum][datum] as input and returns html as output). If not provided, suggestions will render as their value contained in a `<p>` element (i.e. `<p>value</p>`).
 
-* `engine` – The template engine used to compile/render `template` if it is a string. Any engine can use used as long as it adheres to the [expected API][template-engine-compatibility]. **Required** if `template` is a string.
+* `engine` – The template engine used to compile/render `template` if it is a string. Any engine can be used as long as it adheres to the [expected API][template-engine-compatibility]. **Required** if `template` is a string.
 
 * `header` – The header rendered before suggestions in the dropdown menu. Can be either a DOM element or HTML.
 
@@ -161,7 +161,7 @@ Remote data is only used when the data provided by `local` and `prefetch` is ins
 
 When configuring `remote`, the following options are available:
 
-* `url` – A URL to make requests to when when the data provided by `local` and `prefetch` is insufficient. **Required.**
+* `url` – A URL to make requests to when the data provided by `local` and `prefetch` is insufficient. **Required.**
 
 * `dataType` – The type of data you're expecting from the server. See the [jQuery.ajax docs][jquery-ajax] for more info. Defaults to `json`.
 
@@ -198,6 +198,27 @@ typeahead.js triggers the following custom events:
 * `typeahead:autocompleted` – Triggered when the query is autocompleted. The datum used for autocompletion is passed to the event handler as an argument in addition to the name of the dataset it originated from.
 
 All custom events are triggered on the element initialized as a typeahead.
+
+```javascript
+$('input.typeahead-devs').typeahead({
+    name: 'accounts',
+    local: [{
+        value: '@JakeHarding',
+        tokens: ['Jake', 'Harding'],
+        name: 'Jake Harding',
+        profileImageUrl: 'https://twitter.com/JakeHaridng/profile_img'
+    }]
+});
+
+$('input.typeahead-devs').on('typeahead:selected', function (object, datum) {
+    // Example: {type: "typeahead:selected", timeStamp: 1377890016108, jQuery203017338529066182673: true, isTrigger: 3, namespace: ""...}
+    console.log(object);
+
+    // Datum containg value, tokens, and custom properties
+    // Example: {value: "@JakeHarding", tokens: ['Jake', 'Harding'], name: "Jake Harding", profileImageUrl: "https://twitter.com/JakeHaridng/profile_img"}
+    console.log(datum);
+});
+```
 
 ### Template Engine Compatibility
 
@@ -237,14 +258,6 @@ By default, the dropdown menu created by typeahead.js is going to look ugly and 
 ```
 
 When an end-user mouses or keys over a `.tt-suggestion`, the class `tt-is-under-cursor` will be added to it. You can use this class as a hook for styling the "under cursor" state of suggestions.
-
-Bootstrap Integration
----------------------
-
-For simple autocomplete use cases, the typeahead component [Bootstrap][bootstrap] provides should suffice. However, if you'd prefer to take advantage of some of the advance features typeahead.js provides, here's what you'll need to do to integrate typeahead.js with Bootstrap:
-
-* If you're customizing Bootstrap, exclude the typeahead component. If you're depending on the standard *bootstrap.js*, ensure *typeahead.js* is loaded after it.
-* The DOM structure of the dropdown menu used by typeahead.js differs from the DOM structure of the Bootstrap dropdown menu. You'll need to load some [additional CSS][typeahead.js-bootstrap.css] in order to get the typeahead.js dropdown menu to fit the default Bootstrap theme.
 
 Browser Support
 ---------------
@@ -355,5 +368,3 @@ Licensed under the MIT License
 [jQuery]: http://jquery.com/
 [jquery-ajax]: http://api.jquery.com/jQuery.ajax/
 [hogan.js]: http://twitter.github.com/hogan.js/
-[bootstrap]: http://twitter.github.com/bootstrap/
-[typeahead.js-bootstrap.css]: https://github.com/jharding/typeahead.js-bootstrap.css
