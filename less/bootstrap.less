@@ -2,9 +2,18 @@
 @import "bootstrap/mixins.less";
 
 .twitter-typeahead {
+  width: 100%;
+  position: relative;
+
   .tt-query,
   .tt-hint {
     margin-bottom: 0;
+    width: 100%;
+    height: 32px;
+    position: absolute;
+    border-radius: @border-radius-base;
+    top: 0;
+    left: 0;
   }
 
   .tt-hint { 
@@ -14,6 +23,11 @@
     font-size: @font-size-base;
     line-height: @line-height-base;
     border: 1px solid transparent;
+  }
+  
+  .tt-query {
+    z-index: 2;
+    
   }
 }
 
