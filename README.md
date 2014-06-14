@@ -1,4 +1,4 @@
-[![build status](https://secure.travis-ci.org/twitter/typeahead.js.png?branch=master)](http://travis-ci.org/twitter/typeahead.js)
+[![build status](https://secure.travis-ci.org/InWayOpenSource/typeahead.js.png?branch=master)](http://travis-ci.org/InWayOpenSource/typeahead.js)
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
 
