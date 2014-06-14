@@ -64,22 +64,24 @@ module.exports = function(grunt) {
         }
     },
 
-    recess: {
-      options: {
-        compile: true,
-        banner: '<%= banner %>'
-      },
-      bootstrap: {
-        src: ['less/bootstrap.less'],
-        dest: 'dist/<%= pkg.name %>.css'
-      },
-      min: {
+    less: {
+      compile: {
         options: {
-          compress: true
+          strictMath: true
         },
-        src: ['less/bootstrap.less'],
-        dest: 'dist/<%= pkg.name %>.min.css'
+        files: {
+          'dist/<%= pkg.name %>.css': 'less/bootstrap.less',
+        }
       },
+      minify: {
+        options: {
+          cleancss: true,
+          report: 'min'
+        },
+        files: {
+          'dist/<%= pkg.name %>.min.css': 'dist/<%= pkg.name %>.css',
+        }
+      }
     },
 
     sed: {
@@ -242,7 +244,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', 'build');
   grunt.registerTask('build', ['uglify', 'css', 'sed:version']);
-  grunt.registerTask('css', ['curl-dir:bootstrap-less', 'recess']);
+  grunt.registerTask('css', ['curl-dir:bootstrap-less', 'less']);
   grunt.registerTask('server', 'connect:server');
   grunt.registerTask('lint', 'jshint');
   grunt.registerTask('test', 'jasmine:js');
@@ -258,10 +260,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-curl');
-  grunt.loadNpmTasks('grunt-recess');
 };
