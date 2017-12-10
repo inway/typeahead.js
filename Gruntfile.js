@@ -328,17 +328,14 @@ module.exports = function(grunt) {
   // -------
 
   grunt.registerTask('default', 'build');
-<<<<<<< HEAD
-  grunt.registerTask('build', ['uglify', 'css', 'sed:version']);
   grunt.registerTask('css', ['curl-dir:bootstrap-less', 'less']);
-=======
->>>>>>> upstream/master
   grunt.registerTask('server', 'connect:server');
   grunt.registerTask('lint', 'jshint');
   grunt.registerTask('dev', ['build', 'concurrent:dev']);
   grunt.registerTask('build', [
     'uglify:concatBloodhound',
     'uglify:concatTypeahead',
+    'css',
     'umd:bloodhound',
     'umd:typeahead',
     'uglify:bloodhound',
