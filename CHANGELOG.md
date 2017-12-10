@@ -1,7 +1,8 @@
 Changelog
 =========
 
-For transparency and insight into our release cycle, releases will be numbered with the follow format:
+For transparency and insight into our release cycle, releases will be numbered 
+with the follow format:
 
 `<major>.<minor>.<patch>`
 
@@ -14,6 +15,52 @@ And constructed with the following guidelines:
 For more information on semantic versioning, please visit http://semver.org/.
 
 ---
+
+### 0.11.1 April 26, 2015
+
+* Add prepare option to prefetch. [#1181]
+* Handle QuotaExceededError. [#1110]
+* Escape HTML entities from suggestion display value when rendering with default
+  template. [#964]
+* List jquery as a dependency in package.json. [#1143]
+
+### 0.11.0 April 25, 2015
+
+An overhaul of typeahead.js – consider this a release candidate for v1. There
+are bunch of API changes with this release so don't expect backwards 
+compatibility with previous versions. There are also many new undocumented 
+features that have been introduced. Documentation for those features will be 
+added before v1 ships.
+
+Beware that since this release is pretty much a rewrite, there are bound to be
+some bugs. To be safe, you should consider this release beta software and 
+throughly test your integration of it before using it in production 
+environments. This caveat only applies to this release as subsequent releases
+will address any issues that come up.
+
+### 0.10.5 August 7, 2014
+
+* Increase supported version range for jQuery dependency. [#917]
+
+### 0.10.4 July 13, 2014
+
+**Hotfix**
+
+* Fix regression that breaks Bloodhound instances when more than 1 instance is
+  relying on remote data. [#899]
+
+### 0.10.3 July 10, 2014
+
+**Bug fixes**
+
+* `Bloodhound#clearPrefetchCache` now works with cache keys that contain regex 
+  characters. [#771]
+* Prevent outdated network requests from being sent. [#809]
+* Add support to object tokenizers for multiple property tokenization. [#811]
+* Fix broken `jQuery#typeahead('val')` method. [#815]
+* Remove `disabled` attribute from the hint input control. [#839]
+* Add `tt-highlight` class to highlighted text. [#833]
+* Handle non-string types that are passed to `jQuery#typeahead('val', val)`. [#881]
 
 ### 0.10.2 March 10, 2014
 
@@ -135,6 +182,19 @@ work for them with a custom implementation.
 
 [0.10.0 milestone]: https://github.com/twitter/typeahead.js/issues?milestone=8&page=1&state=closed
 
+[#1181]: https://github.com/twitter/typeahead.js/pull/1181
+[#1143]: https://github.com/twitter/typeahead.js/pull/1143
+[#1110]: https://github.com/twitter/typeahead.js/pull/1110
+[#964]: https://github.com/twitter/typeahead.js/pull/964
+[#917]: https://github.com/twitter/typeahead.js/pull/917
+[#899]: https://github.com/twitter/typeahead.js/pull/899
+[#881]: https://github.com/twitter/typeahead.js/pull/881
+[#839]: https://github.com/twitter/typeahead.js/pull/839
+[#833]: https://github.com/twitter/typeahead.js/pull/833
+[#815]: https://github.com/twitter/typeahead.js/pull/815
+[#811]: https://github.com/twitter/typeahead.js/pull/811
+[#809]: https://github.com/twitter/typeahead.js/pull/809
+[#771]: https://github.com/twitter/typeahead.js/pull/771
 [#754]: https://github.com/twitter/typeahead.js/pull/754
 [#742]: https://github.com/twitter/typeahead.js/pull/742
 [#718]: https://github.com/twitter/typeahead.js/pull/718

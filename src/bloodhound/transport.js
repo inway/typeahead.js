@@ -5,10 +5,12 @@
  */
 
 var Transport = (function() {
+  'use strict';
+
   var pendingRequestsCount = 0,
       pendingRequests = {},
       maxPendingRequests = 6,
-      requestCache = new LruCache(10);
+      sharedCache = new LruCache(10);
 
   // constructor
   // -----------
@@ -16,8 +18,13 @@ var Transport = (function() {
   function Transport(o) {
     o = o || {};
 
-    this._send = o.transport ? callbackToDeferred(o.transport) : $.ajax;
-    this._get = o.rateLimiter ? o.rateLimiter(this._get) : this._get;
+    this.cancelled = false;
+    this.lastReq = null;
+
+    this._send = o.transport;
+    this._get = o.limiter ? o.limiter(this._get) : this._get;
+
+    this._cache = o.cache === false ? new LruCache(0) : sharedCache;
   }
 
   // static methods
@@ -27,8 +34,8 @@ var Transport = (function() {
     maxPendingRequests = num;
   };
 
-  Transport.resetCache = function clearCache() {
-    requestCache = new LruCache(10);
+  Transport.resetCache = function resetCache() {
+    sharedCache.reset();
   };
 
   // instance methods
@@ -38,19 +45,30 @@ var Transport = (function() {
 
     // ### private
 
-    _get: function(url, o, cb) {
-      var that = this, jqXhr;
+    _fingerprint: function fingerprint(o) {
+      o = o || {};
+      return o.url + o.type + $.param(o.data || {});
+    },
+
+    _get: function(o, cb) {
+      var that = this, fingerprint, jqXhr;
+
+      fingerprint = this._fingerprint(o);
+
+      // #149: don't make a network request if there has been a cancellation
+      // or if the url doesn't match the last url Transport#get was invoked with
+      if (this.cancelled || fingerprint !== this.lastReq) { return; }
 
       // a request is already in progress, piggyback off of it
-      if (jqXhr = pendingRequests[url]) {
+      if (jqXhr = pendingRequests[fingerprint]) {
         jqXhr.done(done).fail(fail);
       }
 
       // under the pending request threshold, so fire off a request
       else if (pendingRequestsCount < maxPendingRequests) {
         pendingRequestsCount++;
-        pendingRequests[url] =
-          this._send(url, o).done(done).fail(fail).always(always);
+        pendingRequests[fingerprint] =
+          this._send(o).done(done).fail(fail).always(always);
       }
 
       // at the pending request threshold, so hang out in the on deck circle
@@ -59,17 +77,17 @@ var Transport = (function() {
       }
 
       function done(resp) {
-        cb && cb(null, resp);
-        requestCache.set(url, resp);
+        cb(null, resp);
+        that._cache.set(fingerprint, resp);
       }
 
       function fail() {
-        cb && cb(true);
+        cb(true);
       }
 
       function always() {
         pendingRequestsCount--;
-        delete pendingRequests[url];
+        delete pendingRequests[fingerprint];
 
         // ensures request is always made for the last query
         if (that.onDeckRequestArgs) {
@@ -81,53 +99,32 @@ var Transport = (function() {
 
     // ### public
 
-    get: function(url, o, cb) {
-      var resp;
+    get: function(o, cb) {
+      var resp, fingerprint;
 
-      if (_.isFunction(o)) {
-        cb = o;
-        o = {};
-      }
+      cb = cb || $.noop;
+      o = _.isString(o) ? { url: o } : (o || {});
+
+      fingerprint = this._fingerprint(o);
+
+      this.cancelled = false;
+      this.lastReq = fingerprint;
 
       // in-memory cache hit
-      if (resp = requestCache.get(url)) {
-        // defer to stay consistent with behavior of ajax call
-        _.defer(function() { cb && cb(null, resp); });
+      if (resp = this._cache.get(fingerprint)) {
+        cb(null, resp);
       }
 
+      // go to network
       else {
-        this._get(url, o, cb);
+        this._get(o, cb);
       }
+    },
 
-      // return bool indicating whether or not a cache hit occurred
-      return !!resp;
+    cancel: function() {
+      this.cancelled = true;
     }
   });
 
   return Transport;
-
-  // helper functions
-  // ----------------
-
-  function callbackToDeferred(fn) {
-    return function customSendWrapper(url, o) {
-      var deferred = $.Deferred();
-
-      fn(url, o, onSuccess, onError);
-
-      return deferred;
-
-      function onSuccess(resp) {
-        // defer in case fn is synchronous, otherwise done
-        // and always handlers will be attached after the resolution
-        _.defer(function() { deferred.resolve(resp); });
-      }
-
-      function onError(err) {
-        // defer in case fn is synchronous, otherwise done
-        // and always handlers will be attached after the resolution
-        _.defer(function() { deferred.reject(err); });
-      }
-    };
-  }
 })();

@@ -4,7 +4,10 @@
  * Copyright 2013-2014 Twitter, Inc. and other contributors; Licensed MIT
  */
 
-var SearchIndex = (function() {
+var SearchIndex = window.SearchIndex = (function() {
+  'use strict';
+
+  var CHILDREN = 'c', IDS = 'i';
 
   // constructor
   // -----------
@@ -16,6 +19,7 @@ var SearchIndex = (function() {
       $.error('datumTokenizer and queryTokenizer are both required');
     }
 
+    this.identify = o.identify || _.stringify;
     this.datumTokenizer = o.datumTokenizer;
     this.queryTokenizer = o.queryTokenizer;
 
@@ -42,7 +46,7 @@ var SearchIndex = (function() {
       _.each(data, function(datum) {
         var id, tokens;
 
-        id = that.datums.push(datum) - 1;
+        that.datums[id = that.identify(datum)] = datum;
         tokens = normalizeTokens(that.datumTokenizer(datum));
 
         _.each(tokens, function(token) {
@@ -52,14 +56,20 @@ var SearchIndex = (function() {
           chars = token.split('');
 
           while (ch = chars.shift()) {
-            node = node.children[ch] || (node.children[ch] = newNode());
-            node.ids.push(id);
+            node = node[CHILDREN][ch] || (node[CHILDREN][ch] = newNode());
+            node[IDS].push(id);
           }
         });
       });
     },
 
-    get: function get(query) {
+    get: function get(ids) {
+      var that = this;
+
+      return _.map(ids, function(id) { return that.datums[id]; });
+    },
+
+    search: function search(query) {
       var that = this, tokens, matches;
 
       tokens = normalizeTokens(this.queryTokenizer(query));
@@ -76,11 +86,11 @@ var SearchIndex = (function() {
         chars = token.split('');
 
         while (node && (ch = chars.shift())) {
-          node = node.children[ch];
+          node = node[CHILDREN][ch];
         }
 
         if (node && chars.length === 0) {
-          ids = node.ids.slice(0);
+          ids = node[IDS].slice(0);
           matches = matches ? getIntersection(matches, ids) : ids;
         }
 
@@ -95,8 +105,18 @@ var SearchIndex = (function() {
         _.map(unique(matches), function(id) { return that.datums[id]; }) : [];
     },
 
+    all: function all() {
+      var values = [];
+
+      for (var key in this.datums) {
+        values.push(this.datums[key]);
+      }
+
+      return values;
+    },
+
     reset: function reset() {
-      this.datums = [];
+      this.datums = {};
       this.trie = newNode();
     },
 
@@ -121,13 +141,18 @@ var SearchIndex = (function() {
   }
 
   function newNode() {
-    return { ids: [], children: {} };
+    var node = {};
+
+    node[IDS] = [];
+    node[CHILDREN] = {};
+
+    return node;
   }
 
   function unique(array) {
     var seen = {}, uniques = [];
 
-    for (var i = 0; i < array.length; i++) {
+    for (var i = 0, len = array.length; i < len; i++) {
       if (!seen[array[i]]) {
         seen[array[i]] = true;
         uniques.push(array[i]);
@@ -140,10 +165,12 @@ var SearchIndex = (function() {
   function getIntersection(arrayA, arrayB) {
     var ai = 0, bi = 0, intersection = [];
 
-    arrayA = arrayA.sort(compare);
-    arrayB = arrayB.sort(compare);
+    arrayA = arrayA.sort();
+    arrayB = arrayB.sort();
 
-    while (ai < arrayA.length && bi < arrayB.length) {
+    var lenArrayA = arrayA.length, lenArrayB = arrayB.length;
+
+    while (ai < lenArrayA && bi < lenArrayB) {
       if (arrayA[ai] < arrayB[bi]) {
         ai++;
       }
@@ -160,7 +187,5 @@ var SearchIndex = (function() {
     }
 
     return intersection;
-
-    function compare(a, b) { return a - b; }
   }
 })();
